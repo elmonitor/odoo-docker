@@ -16,7 +16,6 @@ apt-cache policy docker-ce
 sudo apt install docker-ce
 sudo systemctl status docker
 sudo usermod -aG docker elmonitor
-su - elmonitor
 groups
 
 #odoo
@@ -25,6 +24,8 @@ sudo apt install docker-compose
 docker-compose –version
 mkdir ~/odoo
 cd ~/odoo
+
+##################################
 nano docker-compose.yml
 
 version: '3'
@@ -48,7 +49,9 @@ volumes:
   data:
   db:
 
+####################################
 
+####################################
 nano .env
 
 # postgresql environment variables
@@ -62,11 +65,15 @@ HOST=postgres
 USER=odoo
 PASSWORD=a_strong_password_for_user
 
+######################################
+
 docker-compose up -d
 curl --head http://localhost:8069
 sudo apt update
 sudo apt install nginx
 sudo ufw allow "Nginx Full"
+
+######################################
 sudo nano /etc/nginx/sites-available/odoo.conf
 
 server {
@@ -85,6 +92,7 @@ server {
       proxy_pass http://localhost:8069;
   }
 }
+#########################################
 
 sudo ln -s /etc/nginx/sites-available/odoo.conf /etc/nginx/sites-enabled/
 sudo systemctl reload nginx.service
