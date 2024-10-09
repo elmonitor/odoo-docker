@@ -1,0 +1,88 @@
+#Ubuntu
+adduser elmonitor
+usermod -aG sudo elmonitor 
+ufw allow OpenSSH
+ufw enable
+
+#Docker
+su - elmonitor
+sudo apt update
+sudo apt install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt update
+apt-cache policy docker-ce
+sudo systemctl status docker
+sudo usermod -aG docker elmonitor
+su - elmonitor
+groups
+
+#odoo
+sudo apt update
+sudo apt install docker-compose
+docker-compose –version
+mkdir ~/odoo
+cd ~/odoo
+nano docker-compose.yml
+
+version: '3'
+services:
+  odoo:
+    image: odoo:16.0
+    env_file: .env
+    depends_on:
+      - postgres
+    ports:
+      - "127.0.0.1:8069:8069"
+    volumes:
+      - data:/var/lib/odoo
+  postgres:
+    image: postgres:13
+    env_file: .env
+    volumes:
+      - db:/var/lib/postgresql/data/pgdata
+
+volumes:
+  data:
+  db:
+
+
+nano .env
+
+# postgresql environment variables
+POSTGRES_DB=postgres
+POSTGRES_PASSWORD=a_strong_password_for_user
+POSTGRES_USER=odoo
+PGDATA=/var/lib/postgresql/data/pgdata
+
+# odoo environment variables
+HOST=postgres
+USER=odoo
+PASSWORD=a_strong_password_for_user
+
+docker-compose up -d
+curl --head http://localhost:8069
+sudo apt update
+sudo apt install nginx
+sudo ufw allow "Nginx Full"
+sudo nano /etc/nginx/sites-available/odoo.conf
+
+server {
+    listen       80;
+    listen       [::]:80;
+    server_name  your_domain_here;
+
+    access_log  /var/log/nginx/odoo.access.log;
+    error_log   /var/log/nginx/odoo.error.log;
+
+    location / {
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Real-IP $remote_addr;
+      proxy_set_header X-Forwarded-Host $host;
+      proxy_set_header X-Forwarded-Proto https;
+      proxy_pass http://localhost:8069;
+  }
+}
+
+sudo ln -s /etc/nginx/sites-available/odoo.conf /etc/nginx/sites-enabled/
+sudo systemctl reload nginx.service
