@@ -106,5 +106,5 @@ Copiar archivos en docker
 docker cp ./some_file CONTAINER:/mnt/extra-addons
 
 #########################################
-Mover contenido de archivo en addons
+Mover contenido de una carpeta en addons
 mv /some_folder/* /extra-addons
