@@ -96,3 +96,15 @@ server {
 
 sudo ln -s /etc/nginx/sites-available/odoo.conf /etc/nginx/sites-enabled/
 sudo systemctl reload nginx.service
+
+#########################################
+root en docker:
+docker exec -it -u root:root container /bin/bash
+
+#########################################
+Copiar archivos en docker
+docker cp ./some_file CONTAINER:/mnt/extra-addons
+
+#########################################
+Mover contenido de archivo en addons
+mv /some_folder/* /extra-addons
